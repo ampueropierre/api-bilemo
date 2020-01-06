@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
@@ -27,12 +28,17 @@ class Product
     private $name;
 
     /**
-     * @var Client
+     * @var ArrayCollection
      *
-     * @ORM\ManyToOne(targetEntity="Client", inversedBy="products" , cascade={"all"}, fetch="EAGER")
-     * @ORM\JoinColumn(name="client_id", referencedColumnName="id")
+     * @ORM\ManyToMany(targetEntity="Client", inversedBy="products")
+     * @ORM\JoinColumn(name="products_clients")
      */
-    private $client;
+    private $clients;
+
+    public function __construct()
+    {
+        $this->clients = new ArrayCollection();
+    }
 
     /**
      * @return int
@@ -73,20 +79,27 @@ class Product
     }
 
     /**
-     * @return Client
+     * @return ArrayCollection
      */
-    public function getClient(): Client
+    public function getClients()
     {
-        return $this->client;
+        return $this->clients;
     }
 
-    /**
-     * @param Client $client
-     * @return Product
-     */
-    public function setClient(Client $client): Product
+    public function addClient(Client $client)
     {
-        $this->client = $client;
+        if (!$this->clients->contains($client)) {
+            $this->clients[] = $client;
+        }
+
+        return $this;
+    }
+
+    public function removeClient(Client $client)
+    {
+        if ($this->clients->contains($client)) {
+            $this->clients->removeElement($client);
+        }
 
         return $this;
     }

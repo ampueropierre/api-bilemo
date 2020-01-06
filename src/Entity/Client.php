@@ -37,7 +37,7 @@ class Client
     /**
      * @var ArrayCollection
      *
-     * @ORM\OneToMany(targetEntity="Product", mappedBy="client", cascade={"persist"})
+     * @ORM\ManyToMany(targetEntity="Product", mappedBy="clients")
      */
     private $products;
 
@@ -99,5 +99,35 @@ class Client
     public function getProducts()
     {
         return $this->products;
+    }
+
+    /**
+     * @param Product $product
+     *
+     * @return $this
+     */
+    public function addProduct(Product $product)
+    {
+        if (!$this->products->contains($product)) {
+            $this->products[] = $product;
+            $product->addClient($this);
+        }
+
+        return $this;
+    }
+
+    /**
+     * @param Product $product
+     *
+     * @return $this
+     */
+    public function removeProduct(Product $product)
+    {
+        if ($this->products->contains($product)) {
+            $this->products->removeElement($product);
+            $product->removeClient($this);
+        }
+
+        return $this;
     }
 }
