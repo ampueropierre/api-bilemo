@@ -30,14 +30,14 @@ class Client
     /**
      * @var ArrayCollection
      *
-     * @ORM\OneToMany(targetEntity="User", mappedBy="client", cascade={"persist"})
+     * @ORM\OneToMany(targetEntity="User", mappedBy="client", cascade={"persist"}, fetch="EAGER")
      */
     private $users;
 
     /**
      * @var ArrayCollection
      *
-     * @ORM\ManyToMany(targetEntity="Product", mappedBy="clients")
+     * @ORM\ManyToMany(targetEntity="Product", mappedBy="clients", fetch="EAGER")
      */
     private $products;
 
