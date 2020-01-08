@@ -4,6 +4,7 @@ namespace App\Entity;
 
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
+use JMS\Serializer\Annotation\Groups;
 
 /**
  * Class Product
@@ -14,6 +15,7 @@ class Product
     /**
      * @var int
      *
+     * @Groups({"product"})
      * @ORM\Column(type="integer")
      * @ORM\Id()
      * @ORM\GeneratedValue(strategy="AUTO")
@@ -23,6 +25,7 @@ class Product
     /**
      * @var string
      *
+     * @Groups({"product"})
      * @ORM\Column(type="string", length=255)
      */
     private $name;
@@ -30,7 +33,7 @@ class Product
     /**
      * @var ArrayCollection
      *
-     * @ORM\ManyToMany(targetEntity="Client", inversedBy="products")
+     * @ORM\ManyToMany(targetEntity="Client", inversedBy="products", fetch="EAGER")
      * @ORM\JoinColumn(name="products_clients")
      */
     private $clients;
