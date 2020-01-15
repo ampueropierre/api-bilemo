@@ -3,16 +3,21 @@
 namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use JMS\Serializer\Annotation\Groups;
+use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 
 /**
  * Class User
  * @ORM\Entity()
+ * @UniqueEntity("email")
  */
 class User
 {
     /**
      * @var int
      *
+     * @Groups({"list", "show"})
      * @ORM\Column(type="integer")
      * @ORM\Id()
      * @ORM\GeneratedValue(strategy="AUTO")
@@ -22,21 +27,26 @@ class User
     /**
      * @var string
      *
+     * @Groups({"list", "show"})
      * @ORM\Column(type="string", length=255)
+     * @Assert\NotBlank(groups={"Create","Update"})
      */
     private $fullName;
 
     /**
      * @var string
      *
+     * @Groups({"list", "show"})
      * @ORM\Column(type="string", length=255)
+     * @Assert\NotBlank(groups={"Create","Update"})
+     * @Assert\Email(groups={"Create","Update"}, message="The email '{{ value }}' is not a valid email")
      */
     private $email;
 
     /**
      * @var Client
      *
-     * @ORM\ManyToOne(targetEntity="Client", inversedBy="users", cascade={"all"}, fetch="EAGER")
+     * @ORM\ManyToOne(targetEntity="Client", inversedBy="users", fetch="EAGER")
      * @ORM\JoinColumn(name="client_id", referencedColumnName="id")
      */
     private $client;
@@ -61,9 +71,9 @@ class User
     }
 
     /**
-     * @return string
+     * @return string|null
      */
-    public function getFullName(): string
+    public function getFullName(): ?string
     {
         return $this->fullName;
     }
@@ -80,9 +90,9 @@ class User
     }
 
     /**
-     * @return string
+     * @return string|null
      */
-    public function getEmail(): string
+    public function getEmail(): ?string
     {
         return $this->email;
     }
