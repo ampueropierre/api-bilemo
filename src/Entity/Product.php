@@ -4,7 +4,9 @@ namespace App\Entity;
 
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
+use JMS\Serializer\Annotation as Serializer;
 use JMS\Serializer\Annotation\Groups;
+use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * Class Product
@@ -27,20 +29,21 @@ class Product
      *
      * @Groups({"product"})
      * @ORM\Column(type="string", length=255)
+     * @Assert\NotBlank()
      */
     private $name;
 
     /**
      * @var ArrayCollection
      *
-     * @ORM\ManyToMany(targetEntity="Client", inversedBy="products", fetch="EAGER")
-     * @ORM\JoinColumn(name="products_clients")
+     * @ORM\ManyToMany(targetEntity="User", inversedBy="products", fetch="EAGER")
+     * @ORM\JoinColumn(name="products_users")
      */
-    private $clients;
+    private $users;
 
     public function __construct()
     {
-        $this->clients = new ArrayCollection();
+        $this->users = new ArrayCollection();
     }
 
     /**
@@ -84,24 +87,24 @@ class Product
     /**
      * @return ArrayCollection
      */
-    public function getClients()
+    public function getUsers()
     {
-        return $this->clients;
+        return $this->users;
     }
 
-    public function addClient(Client $client)
+    public function addClient(User $user)
     {
-        if (!$this->clients->contains($client)) {
-            $this->clients[] = $client;
+        if (!$this->users->contains($user)) {
+            $this->users[] = $user;
         }
 
         return $this;
     }
 
-    public function removeClient(Client $client)
+    public function removeUser(User $user)
     {
-        if ($this->clients->contains($client)) {
-            $this->clients->removeElement($client);
+        if ($this->users->contains($user)) {
+            $this->users->removeElement($user);
         }
 
         return $this;

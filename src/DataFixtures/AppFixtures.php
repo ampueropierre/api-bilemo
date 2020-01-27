@@ -6,11 +6,19 @@ use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Common\Persistence\ObjectManager;
 use Faker;
 use App\Entity\Product;
-use App\Entity\Client;
 use App\Entity\User;
+use App\Entity\UserClient;
+use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 
 class AppFixtures extends Fixture
 {
+    private $passwordEncoder;
+
+    public function __construct(UserPasswordEncoderInterface $passwordEncoder)
+    {
+        $this->passwordEncoder = $passwordEncoder;
+    }
+
     public function load(ObjectManager $manager)
     {
         $mobile = [
@@ -47,33 +55,28 @@ class AppFixtures extends Fixture
             $tab[] = $product;
         }
 
-        $clientFirst = new Client();
-        $clientFirst->setEmail($faker->email);
+        $admin_user = new User();
+        $admin_user->setEmail('admin@bilemo.com');
+        $admin_user->setPassword($this->passwordEncoder->encodePassword($admin_user,'admin'));
+        $admin_user->setRoles(['ROLE_ADMIN']);
+
+        $manager->persist($admin_user);
+
+        $classic_user = new User();
+        $classic_user->setEmail('user@bilemo.com');
+        $classic_user->setPassword($this->passwordEncoder->encodePassword($classic_user,'user'));
+        $classic_user->setRoles(['ROLE_USER']);
 
         for ($i=0; $i < 5; $i++) {
-            $clientFirst->addProduct($tab[$i]);
-            $user = new User();
-            $user->setFullname($faker->name);
-            $user->setEmail($faker->email);
-            $user->setClient($clientFirst);
-            $manager->persist($user);
+            $classic_user->addProduct($tab[$i]);
+            $userClient = new UserClient();
+            $userClient->setFullname($faker->name);
+            $userClient->setEmail($faker->email);
+            $userClient->setUser($classic_user);
+            $manager->persist($userClient);
         }
 
-        $manager->persist($clientFirst);
-
-        $clientSecond = new Client();
-        $clientSecond->setEmail($faker->email);
-
-        for ($i=10; $i < 15; $i++) {
-            $clientSecond->addProduct($tab[$i]);
-            $user = new User();
-            $user->setFullname($faker->name);
-            $user->setEmail($faker->email);
-            $user->setClient($clientSecond);
-            $manager->persist($user);
-        }
-
-        $manager->persist($clientSecond);
+        $manager->persist($classic_user);
 
         $manager->flush();
     }

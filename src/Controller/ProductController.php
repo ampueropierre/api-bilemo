@@ -5,41 +5,47 @@ namespace App\Controller;
 use App\Entity\Product;
 use FOS\RestBundle\Controller\AbstractFOSRestController;
 use FOS\RestBundle\Controller\Annotations as Rest;
-use Symfony\Component\HttpFoundation\Response;
-use FOS\RestBundle\Context\Context;
+use FOS\RestBundle\Controller\Annotations\View;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\ParamConverter;
 
 class ProductController extends AbstractFOSRestController
 {
 
     /**
      * Lists all products
-     * @Rest\Get("/products", name="app_product_list")
-     * @return Response
+     * @Rest\Get("api/products", name="app_product_list")
+     * @View(statusCode=200, serializerGroups={"product"})
      */
     public function getProducts()
     {
-        $products = $this->getDoctrine()->getRepository(Product::class)->findAll();
-        $context = new Context();
-        $context->addGroup('product');
-        $view = $this->view($products, 200);
-        $view->setContext($context);
-
-        return $this->handleView($view);
+        return $this->getDoctrine()->getRepository(Product::class)->findAll();
     }
 
     /**
      * Show one product
-     * @Rest\Get("/product/{id}", name="app_product_show", requirements={"id"="\d+"})
+     * @Rest\Get("api/product/{id}", name="app_product_show", requirements={"id"="\d+"})
      * @param Product $product
-     * @return Response
+     * @View(statusCode=200, serializerGroups={"product"})
      */
     public function getProduct(Product $product)
     {
-        $context = new Context();
-        $context->addGroup('product');
-        $view = $this->view($product,200);
-        $view->setContext($context);
+        return $product;
+    }
 
-        return $this->handleView($view);
+    /**
+     * @Rest\Post("api/product", name="app_product_create")
+     * @param Product $product
+     * @ParamConverter("product", converter="fos_rest.request_body")
+     * @Rest\View(serializerGroups={"product"})
+     * @IsGranted("ROLE_ADMIN")
+     */
+    public function createProduct(Product $product)
+    {
+        $em = $this->getDoctrine()->getManager();
+        $em->persist($product);
+        $em->flush();
+
+        return $product;
     }
 }
