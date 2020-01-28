@@ -4,9 +4,10 @@ namespace App\Entity;
 
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
-use JMS\Serializer\Annotation as Serializer;
 use JMS\Serializer\Annotation\Groups;
 use Symfony\Component\Validator\Constraints as Assert;
+use Nelmio\ApiDocBundle\Annotation\Model;
+use Swagger\Annotations as SWG;
 
 /**
  * Class Product
@@ -21,6 +22,7 @@ class Product
      * @ORM\Column(type="integer")
      * @ORM\Id()
      * @ORM\GeneratedValue(strategy="AUTO")
+     * @SWG\Property(description="The unique identifier of the product.")
      */
     private $id;
 
@@ -30,6 +32,7 @@ class Product
      * @Groups({"product"})
      * @ORM\Column(type="string", length=255)
      * @Assert\NotBlank()
+     * @SWG\Property(type="string", maxLength=255)
      */
     private $name;
 
@@ -38,6 +41,7 @@ class Product
      *
      * @ORM\ManyToMany(targetEntity="User", inversedBy="products", fetch="EAGER")
      * @ORM\JoinColumn(name="products_users")
+     * @SWG\Property(ref=@Model(type=User::class))
      */
     private $users;
 

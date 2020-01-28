@@ -4,6 +4,8 @@ namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 use JMS\Serializer\Annotation\Groups;
+use Swagger\Annotations as SWG;
+use Nelmio\ApiDocBundle\Annotation\Model;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 
@@ -21,6 +23,7 @@ class UserClient
      * @ORM\Column(type="integer")
      * @ORM\Id()
      * @ORM\GeneratedValue(strategy="AUTO")
+     * @SWG\Property(description="The unique identifier of the user client")
      */
     private $id;
 
@@ -30,6 +33,7 @@ class UserClient
      * @Groups({"list", "show"})
      * @ORM\Column(type="string", length=255)
      * @Assert\NotBlank(groups={"Create","Update"})
+     * @SWG\Property(type="string", maxLength=255)
      */
     private $fullName;
 
@@ -40,6 +44,7 @@ class UserClient
      * @ORM\Column(type="string", length=255)
      * @Assert\NotBlank(groups={"Create","Update"})
      * @Assert\Email(groups={"Create","Update"}, message="The email '{{ value }}' is not a valid email")
+     * @SWG\Property(type="string", maxLength=255)
      */
     private $email;
 
@@ -48,6 +53,7 @@ class UserClient
      *
      * @ORM\ManyToOne(targetEntity="User", inversedBy="userClients", fetch="EAGER")
      * @ORM\JoinColumn(name="user_id", referencedColumnName="id")
+     * @SWG\Property(ref=@Model(type=User::class))
      */
     private $user;
 
