@@ -1,13 +1,10 @@
 <?php
 
-
 namespace App\Controller;
 
-use App\Entity\Product;
 use App\Form\UserType;
 use FOS\RestBundle\Controller\AbstractFOSRestController;
 use App\Entity\User;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\ParamConverter;
 use Swagger\Annotations as SWG;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;

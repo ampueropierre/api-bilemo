@@ -3,10 +3,11 @@
 namespace App\Controller;
 
 use App\Entity\UserClient;
+use App\Exception\ResourceValidationException;
+use App\Exception\NotUserCreatedException;
 use FOS\RestBundle\Controller\AbstractFOSRestController;
 use FOS\RestBundle\Controller\Annotations as Rest;
 use Swagger\Annotations as SWG;
-use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use FOS\RestBundle\Controller\Annotations\View;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\ParamConverter;
@@ -50,7 +51,7 @@ class UserClientController extends AbstractFOSRestController
      * )
      * @SWG\Response(
      *     response="400",
-     *     description="Not User created"
+     *     description="Not creator"
      * )
      * @SWG\Response(
      *     response="401",
@@ -61,7 +62,7 @@ class UserClientController extends AbstractFOSRestController
     public function showUser(UserClient $userClient)
     {
         if ($userClient->getUser() != $this->getUser()) {
-            return $this->view(['message' => 'Vous n\'etes pas le createur de cette utilisateur'], Response::HTTP_BAD_REQUEST);
+            throw new NotUserCreatedException('Not Creator');
         }
 
         return $userClient;
@@ -97,7 +98,12 @@ class UserClientController extends AbstractFOSRestController
     public function createUser(UserClient $userClient, ConstraintViolationList $violations)
     {
         if (count($violations)) {
-            return $this->view($violations, Response::HTTP_BAD_REQUEST);
+            $message = 'The JSON sent contains invalid data. Here are the errors you need to correct: ';
+            foreach ($violations as $violation) {
+                $message .= sprintf("Field %s: %s ", $violation->getPropertyPath(), $violation->getMessage());
+            }
+
+            throw new ResourceValidationException($message);
         }
 
         $userClient->setUser($this->getUser());
@@ -123,8 +129,8 @@ class UserClientController extends AbstractFOSRestController
      *     description="Delete"
      * )
      * @SWG\Response(
-     *     response="409",
-     *     description="Not User created"
+     *     response="400",
+     *     description="Not creator"
      * )
      * @SWG\Response(
      *     response="401",
@@ -135,7 +141,7 @@ class UserClientController extends AbstractFOSRestController
     public function deleteUser(UserClient $user)
     {
         if ($user->getUser() != $this->getUser()) {
-            return $this->view(['message' => 'Impossible'], Response::HTTP_CONFLICT);
+            throw new NotUserCreatedException('Not Creator');
         }
 
         $em = $this->getDoctrine()->getManager();
@@ -152,7 +158,7 @@ class UserClientController extends AbstractFOSRestController
      * @param UserClient $userUpdate
      * @param ConstraintViolationList $violations
      * @View(statusCode=200, serializerGroups={"show"})
-     * @ParamConverter("user")
+     * @ParamConverter("userClient")
      * @ParamConverter(
      *     "userUpdate",
      *     converter="fos_rest.request_body",
@@ -165,12 +171,8 @@ class UserClientController extends AbstractFOSRestController
      *     description="Success"
      * )
      * @SWG\Response(
-     *     response="409",
-     *     description="Not User created"
-     * )
-     * @SWG\Response(
      *     response="400",
-     *     description="Not validation"
+     *     description="Not creator or Invalid data"
      * )
      * @SWG\Response(
      *     response="401",
@@ -181,11 +183,21 @@ class UserClientController extends AbstractFOSRestController
     public function updateUser(UserClient $user, UserClient $userUpdate, ConstraintViolationList $violations)
     {
         if ($user->getUser() != $this->getUser()) {
-            return $this->view(['message' => 'Vous n\'etes pas le createur de cette utilisateur'], Response::HTTP_CONFLICT);
+            throw new NotUserCreatedException('Not Creator');
         }
 
         if (count($violations)) {
-            return $this->view($violations, Response::HTTP_BAD_REQUEST);
+            $message = 'The JSON sent contains invalid data. Here are the errors you need to correct: ';
+            foreach ($violations as $violation) {
+                $message .= sprintf("Field %s: %s ", $violation->getPropertyPath(), $violation->getMessage());
+            }
+
+            throw new ResourceValidationException($message);
+        }
+
+        $mail = $this->getDoctrine()->getRepository(UserClient::class)->findOneBy(['email' => $userUpdate->getEmail()]);
+        if ($mail) {
+            throw new ResourceValidationException('Email exist in Database');
         }
 
         $user->setFullName($userUpdate->getFullName());
