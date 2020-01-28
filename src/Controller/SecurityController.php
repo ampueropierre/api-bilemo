@@ -3,9 +3,12 @@
 
 namespace App\Controller;
 
+use App\Entity\Product;
 use App\Form\UserType;
 use FOS\RestBundle\Controller\AbstractFOSRestController;
 use App\Entity\User;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\ParamConverter;
+use Swagger\Annotations as SWG;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use FOS\RestBundle\Controller\Annotations as Rest;
@@ -22,9 +25,19 @@ class SecurityController extends AbstractFOSRestController
     }
 
     /**
+     * Create a new Client
      * @Rest\Post("api/register", name="app_user_register")
      * @param Request $request
      * @View(StatusCode=201,serializerGroups={"public"})
+     * @SWG\Response(
+     *     response="201",
+     *     description="Created a new User"
+     * )
+     * @SWG\Response(
+     *     response="400",
+     *     description="Not validation"
+     * )
+     * @SWG\Tag(name="Register")
      */
     public function register(Request $request)
     {

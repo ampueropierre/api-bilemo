@@ -4,8 +4,9 @@ namespace App\Entity;
 
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
-use JMS\Serializer\Annotation as Serializer;
 use JMS\Serializer\Annotation\Groups;
+use Swagger\Annotations as SWG;
+use Nelmio\ApiDocBundle\Annotation\Model;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Validator\Constraints as Assert;
@@ -24,6 +25,7 @@ class User implements UserInterface
      * @ORM\Id()
      * @ORM\GeneratedValue(strategy="AUTO")
      * @Groups({"public"})
+     * @SWG\Property(description="The unique identifier of the user.")
      */
     private $id;
 
@@ -34,6 +36,7 @@ class User implements UserInterface
      * @Assert\NotBlank()
      * @Assert\Email()
      * @Groups({"public"})
+     * @SWG\Property(type="string", maxLength=180)
      */
     private $email;
 
@@ -42,11 +45,13 @@ class User implements UserInterface
      *
      * @ORM\Column(type="string", length=255)
      * @Assert\NotBlank()
+     * @SWG\Property(type="string", maxLength=255)
      */
     private $password;
 
     /**
      * @ORM\Column(type="json")
+     * @SWG\Property(type="json")
      */
     private $roles = [];
 
@@ -54,6 +59,7 @@ class User implements UserInterface
      * @var ArrayCollection
      *
      * @ORM\OneToMany(targetEntity="UserClient", mappedBy="user", cascade={"persist"}, fetch="EAGER")
+     * @SWG\Property(ref=@Model(type=UserClient::class))
      */
     private $userClients;
 
@@ -61,6 +67,7 @@ class User implements UserInterface
      * @var ArrayCollection
      *
      * @ORM\ManyToMany(targetEntity="Product", mappedBy="users", fetch="EAGER")
+     * @SWG\Property(ref=@Model(type=Product::class))
      */
     private $products;
 
@@ -148,7 +155,7 @@ class User implements UserInterface
     {
         if ($this->products->contains($product)) {
             $this->products->removeElement($product);
-            $product->removeClient($this);
+            $product->removeUser($this);
         }
 
         return $this;
@@ -175,7 +182,6 @@ class User implements UserInterface
         $roles[] = 'ROLE_USER';
 
         return array_unique($roles);
-
     }
 
     /**
