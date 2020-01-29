@@ -4,21 +4,26 @@ namespace App\Entity;
 
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
+use JMS\Serializer\Annotation as Serializer;
 use JMS\Serializer\Annotation\Groups;
 use Symfony\Component\Validator\Constraints as Assert;
 use Nelmio\ApiDocBundle\Annotation\Model;
 use Swagger\Annotations as SWG;
+use JMS\Serializer\Annotation\ExclusionPolicy;
+use JMS\Serializer\Annotation\Expose;
 
 /**
  * Class Product
- * @ORM\Entity()
+ * @ORM\Entity(repositoryClass="App\Repository\ProductRepository")
+ * @ExclusionPolicy("all")
  */
 class Product
 {
     /**
      * @var int
      *
-     * @Groups({"product"})
+     * @Expose()
+     * @Groups("product")
      * @ORM\Column(type="integer")
      * @ORM\Id()
      * @ORM\GeneratedValue(strategy="AUTO")
@@ -29,7 +34,8 @@ class Product
     /**
      * @var string
      *
-     * @Groups({"product"})
+     * @Expose()
+     * @Groups("product")
      * @ORM\Column(type="string", length=255)
      * @Assert\NotBlank()
      * @SWG\Property(type="string", maxLength=255)
