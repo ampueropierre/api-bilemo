@@ -14,3 +14,9 @@ fos_rest:
     rules:
       - { path: '^/', priorities: ['json'], fallback_format: 'json' }
   param_fetcher_listener: true
+  exception:
+    enabled: true
+    codes:
+      'App\Exception\ResourceValidationException': 400
+      'App\Exception\NotUserCreatedException': 400
+

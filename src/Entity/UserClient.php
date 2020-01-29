@@ -41,7 +41,7 @@ class UserClient
      * @var string
      *
      * @Groups({"list", "show"})
-     * @ORM\Column(type="string", length=255)
+     * @ORM\Column(type="string", length=255, unique=true)
      * @Assert\NotBlank(groups={"Create","Update"})
      * @Assert\Email(groups={"Create","Update"}, message="The email '{{ value }}' is not a valid email")
      * @SWG\Property(type="string", maxLength=255)

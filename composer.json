@@ -7,7 +7,7 @@
         "ext-iconv": "*",
         "ext-json": "*",
         "doctrine/annotations": "^1.8",
-        "friendsofsymfony/rest-bundle": "^2.6",
+        "friendsofsymfony/rest-bundle": "dev-error_listener",
         "jms/serializer-bundle": "^3.5",
         "lexik/jwt-authentication-bundle": "^2.6",
         "nelmio/api-doc-bundle": "^3.5",
@@ -72,5 +72,11 @@
             "allow-contrib": false,
             "require": "4.4.*"
         }
-    }
+    },
+    "repositories": [
+        {
+            "type": "git",
+            "url": "https://github.com/yceruto/FOSRestBundle.git"
+        }
+    ]
 }
