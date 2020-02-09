@@ -13,13 +13,15 @@ use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 class AppFixtures extends Fixture
 {
     private $passwordEncoder;
+    private $manager;
 
-    public function __construct(UserPasswordEncoderInterface $passwordEncoder)
+    public function __construct(UserPasswordEncoderInterface $passwordEncoder,ObjectManager $manager)
     {
         $this->passwordEncoder = $passwordEncoder;
+        $this->manager = $manager;
     }
 
-    public function load(ObjectManager $manager)
+    public function load()
     {
         $mobile = [
             'Xperia 5',
@@ -51,33 +53,40 @@ class AppFixtures extends Fixture
         foreach ($mobile as $name) {
             $product = new Product();
             $product->setName($name);
-            $manager->persist($product);
+            $this->manager->persist($product);
             $tab[] = $product;
         }
 
-        $admin_user = new User();
-        $admin_user->setEmail('admin@bilemo.com');
-        $admin_user->setPassword($this->passwordEncoder->encodePassword($admin_user,'admin'));
-        $admin_user->setRoles(['ROLE_ADMIN']);
+        $user = new User();
+        $user->setEmail('user@bilemo.com');
+        $user->setPassword($this->passwordEncoder->encodePassword($user,'bilemo'));
 
-        $manager->persist($admin_user);
-
-        $classic_user = new User();
-        $classic_user->setEmail('user@bilemo.com');
-        $classic_user->setPassword($this->passwordEncoder->encodePassword($classic_user,'user'));
-        $classic_user->setRoles(['ROLE_USER']);
-
-        for ($i=0; $i < 5; $i++) {
-            $classic_user->addProduct($tab[$i]);
+        foreach ($tab as $item) {
+            $user->addProduct($item);
             $userClient = new UserClient();
             $userClient->setFullname($faker->name);
             $userClient->setEmail($faker->email);
-            $userClient->setUser($classic_user);
-            $manager->persist($userClient);
+            $userClient->setUser($user);
+            $this->manager->persist($userClient);
         }
 
-        $manager->persist($classic_user);
+        $this->manager->persist($user);
 
-        $manager->flush();
+        $user2 = new User();
+        $user2->setEmail('user2@bilemo.com');
+        $user2->setPassword($this->passwordEncoder->encodePassword($user2,'bilemo2'));
+
+        for ($i = 0;$i < 5; $i++) {
+            $user2->addProduct($tab[$i]);
+            $userClient = new UserClient();
+            $userClient->setFullname($faker->name);
+            $userClient->setEmail($faker->email);
+            $userClient->setUser($user2);
+            $this->manager->persist($userClient);
+        }
+
+        $this->manager->persist($user2);
+
+        $this->manager->flush();
     }
 }
