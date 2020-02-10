@@ -2,26 +2,28 @@
 
 namespace App\DataFixtures;
 
-use Doctrine\Bundle\FixturesBundle\Fixture;
-use Doctrine\Common\Persistence\ObjectManager;
 use Faker;
 use App\Entity\Product;
 use App\Entity\User;
 use App\Entity\UserClient;
 use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
+use Doctrine\Bundle\FixturesBundle\Fixture;
+use Doctrine\Common\Persistence\ObjectManager;
 
 class AppFixtures extends Fixture
 {
     private $passwordEncoder;
-    private $manager;
 
-    public function __construct(UserPasswordEncoderInterface $passwordEncoder,ObjectManager $manager)
+    public function __construct(UserPasswordEncoderInterface $passwordEncoder)
     {
         $this->passwordEncoder = $passwordEncoder;
-        $this->manager = $manager;
     }
 
-    public function load()
+    /**
+     * @param ObjectManager $manager
+     * @throws \Exception
+     */
+    public function load(ObjectManager $manager)
     {
         $mobile = [
             'Xperia 5',
@@ -53,7 +55,7 @@ class AppFixtures extends Fixture
         foreach ($mobile as $name) {
             $product = new Product();
             $product->setName($name);
-            $this->manager->persist($product);
+            $manager->persist($product);
             $tab[] = $product;
         }
 
@@ -67,10 +69,10 @@ class AppFixtures extends Fixture
             $userClient->setFullname($faker->name);
             $userClient->setEmail($faker->email);
             $userClient->setUser($user);
-            $this->manager->persist($userClient);
+            $manager->persist($userClient);
         }
 
-        $this->manager->persist($user);
+        $manager->persist($user);
 
         $user2 = new User();
         $user2->setEmail('user2@bilemo.com');
@@ -82,11 +84,11 @@ class AppFixtures extends Fixture
             $userClient->setFullname($faker->name);
             $userClient->setEmail($faker->email);
             $userClient->setUser($user2);
-            $this->manager->persist($userClient);
+            $manager->persist($userClient);
         }
 
-        $this->manager->persist($user2);
+        $manager->persist($user2);
 
-        $this->manager->flush();
+        $manager->flush();
     }
 }

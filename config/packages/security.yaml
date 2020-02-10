@@ -7,7 +7,7 @@ security:
                 property: 'email'
     encoders:
         App\Entity\User:
-            algorithm: auto
+            algorithm: bcrypt
     firewalls:
         dev:
             pattern: ^/(_(profiler|wdt)|css|images|js)/
