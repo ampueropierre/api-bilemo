@@ -28,6 +28,7 @@ class UserClientController extends AbstractFOSRestController
      *     description="Unauthorized"
      * )
      * @SWG\Tag(name="User of Client")
+     * @SWG\Parameter( name="Authorization", in="header", required=true, type="string", default="Bearer TOKEN", description="Authorization" )
      */
     public function getUsers()
     {
@@ -58,6 +59,7 @@ class UserClientController extends AbstractFOSRestController
      *     description="Unauthorized"
      * )
      * @SWG\Tag(name="User of Client")
+     * @SWG\Parameter( name="Authorization", in="header", required=true, type="string", default="Bearer TOKEN", description="Authorization" )
      */
     public function showUser(UserClient $userClient)
     {
@@ -94,6 +96,9 @@ class UserClientController extends AbstractFOSRestController
      *     description="Unauthorized"
      * )
      * @SWG\Tag(name="User of Client")
+     * @SWG\Parameter( name="Authorization", in="header", required=true, type="string", default="Bearer TOKEN", description="Authorization" )
+     * @SWG\Parameter( name="full_name", in="formData", type="string", required=true )
+     * @SWG\Parameter( name="email", in="formData", type="string", required=true )
      */
     public function createUser(UserClient $userClient, ConstraintViolationList $violations)
     {
@@ -137,6 +142,7 @@ class UserClientController extends AbstractFOSRestController
      *     description="Unauthorized"
      * )
      * @SWG\Tag(name="User of Client")
+     * @SWG\Parameter( name="Authorization", in="header", required=true, type="string", default="Bearer TOKEN", description="Authorization" )
      */
     public function deleteUser(UserClient $user)
     {
@@ -179,6 +185,7 @@ class UserClientController extends AbstractFOSRestController
      *     description="Unauthorized"
      * )
      * @SWG\Tag(name="User of Client")
+     * @SWG\Parameter( name="Authorization", in="header", required=true, type="string", default="Bearer TOKEN", description="Authorization" )
      */
     public function updateUser(UserClient $user, UserClient $userUpdate, ConstraintViolationList $violations)
     {

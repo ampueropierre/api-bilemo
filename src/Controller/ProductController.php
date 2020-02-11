@@ -9,7 +9,6 @@ use FOS\RestBundle\Controller\Annotations as Rest;
 use FOS\RestBundle\Controller\Annotations\View;
 use FOS\RestBundle\Request\ParamFetcherInterface;
 use Swagger\Annotations as SWG;
-use Nelmio\ApiDocBundle\Annotation\Security;
 
 class ProductController extends AbstractFOSRestController
 {
@@ -52,7 +51,7 @@ class ProductController extends AbstractFOSRestController
      *     description="Unauthorized"
      * )
      * @SWG\Tag(name="Product")
-     * @Security(name="Bearer")
+     * @SWG\Parameter( name="Authorization", in="header", required=true, type="string", default="Bearer TOKEN", description="Authorization" )
      */
     public function getProducts(ParamFetcherInterface $paramFetcher)
     {
@@ -85,6 +84,7 @@ class ProductController extends AbstractFOSRestController
      *     description="Product not found"
      * )
      * @SWG\Tag(name="Product")
+     * @SWG\Parameter( name="Authorization", in="header", required=true, type="string", default="Bearer TOKEN", description="Authorization" )
      */
     public function getProduct(Product $product)
     {
