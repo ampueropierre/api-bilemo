@@ -22,6 +22,7 @@ class ClientController extends AbstractFOSRestController
      *     description="Unauthorized"
      * )
      * @SWG\Tag(name="Client")
+     * @SWG\Parameter( name="Authorization", in="header", required=true, type="string", default="Bearer TOKEN", description="Authorization" )
      */
     public function show()
     {
