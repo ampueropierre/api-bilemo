@@ -20,7 +20,6 @@ class UserClientController extends AbstractFOSRestController
     /**
      * Return list of UserClient to User
      * @Rest\Get("api/users", name="app_userclient_list")
-     * @param CacheInterface $cache
      * @View(statusCode=200, serializerGroups={"list"})
      * @SWG\Response(
      *     response="200",
@@ -33,7 +32,7 @@ class UserClientController extends AbstractFOSRestController
      * @SWG\Tag(name="User of Client")
      * @SWG\Parameter( name="Authorization", in="header", required=true, type="string", default="Bearer TOKEN", description="Authorization" )
      */
-    public function getUsers(CacheInterface $cache)
+    public function getUsers()
     {
         $list = $this->getDoctrine()->getRepository(UserClient::class)->findBy(['user' => $this->getUser()]);
         if (empty($list)) {
@@ -141,7 +140,6 @@ class UserClientController extends AbstractFOSRestController
      * Delete User
      * @Rest\Delete("api/user/{id}", name="app_user_delete", requirements={"id"="\d+"})
      * @param UserClient $user
-     * @param CacheInterface $cache
      * @View(statusCode=204)
      * @SWG\Response(
      *     response="204",
@@ -158,7 +156,7 @@ class UserClientController extends AbstractFOSRestController
      * @SWG\Tag(name="User of Client")
      * @SWG\Parameter( name="Authorization", in="header", required=true, type="string", default="Bearer TOKEN", description="Authorization" )
      */
-    public function deleteUser(UserClient $user,CacheInterface $cache)
+    public function deleteUser(UserClient $user)
     {
         if ($user->getUser() != $this->getUser()) {
             throw new NotUserCreatedException('Not Creator');
