@@ -2,9 +2,11 @@
 
 namespace App\Repository;
 
-class ProductRepository extends AbstractRepository
+use Doctrine\ORM\EntityRepository;
+
+class ProductRepository extends EntityRepository
 {
-    public function search($userId, $term, $order, $limit = 10, $offset = 1)
+    public function pagination($userId, $order)
     {
         $queryBuilder = $this
             ->createQueryBuilder('p')
@@ -12,19 +14,12 @@ class ProductRepository extends AbstractRepository
             ->leftJoin('p.users','t')
             ->where('t.id = :id')
             ->setParameter('id', $userId)
-            ;
+        ;
 
         if ($order) {
             $queryBuilder->orderBy('p.name', $order);
         }
 
-        if ($term) {
-            $queryBuilder
-                ->where('p.name LIKE ?1')
-                ->setParameter(1, '%'.$term.'%')
-                ;
-        }
-
-        return $this->paginate($queryBuilder, $limit, $offset);
+        return $queryBuilder;
     }
 }

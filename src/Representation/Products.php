@@ -2,21 +2,17 @@
 
 namespace App\Representation;
 
-use Pagerfanta\Pagerfanta;
-
 class Products
 {
     public $data;
     public $meta;
 
-    public function __construct(Pagerfanta $data)
+    public function __construct($data)
     {
-        $this->data = $data->getCurrentPageResults();
-        $this->data = $this->data->getArrayCopy();
-        $this->addMeta('limit', $data->getMaxPerPage());
-        $this->addMeta('current_items', count($data->getCurrentPageResults()));
-        $this->addMeta('total_items', $data->getNbResults());
-        $this->addMeta('offset', $data->getCurrentPageOffsetStart());
+        $this->data = $data->getItems();
+        $this->addMeta('limit', $data->getItemNumberPerPage());
+        $this->addMeta('page', $data->getCurrentPageNumber());
+        $this->addMeta('total_items', $data->getTotalItemCount());
     }
 
     public function addMeta($name, $value)

@@ -12,12 +12,15 @@ use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use FOS\RestBundle\Controller\Annotations\View;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\ParamConverter;
 use Symfony\Component\Validator\ConstraintViolationList;
+use Symfony\Contracts\Cache\CacheInterface;
+use Symfony\Contracts\Cache\ItemInterface;
 
 class UserClientController extends AbstractFOSRestController
 {
     /**
      * Return list of UserClient to User
      * @Rest\Get("api/users", name="app_userclient_list")
+     * @param CacheInterface $cache
      * @View(statusCode=200, serializerGroups={"list"})
      * @SWG\Response(
      *     response="200",
@@ -30,10 +33,9 @@ class UserClientController extends AbstractFOSRestController
      * @SWG\Tag(name="User of Client")
      * @SWG\Parameter( name="Authorization", in="header", required=true, type="string", default="Bearer TOKEN", description="Authorization" )
      */
-    public function getUsers()
+    public function getUsers(CacheInterface $cache)
     {
         $list = $this->getDoctrine()->getRepository(UserClient::class)->findBy(['user' => $this->getUser()]);
-
         if (empty($list)) {
             return $this->view(['message' => 'List Empty'], 200);
         }
@@ -45,6 +47,7 @@ class UserClientController extends AbstractFOSRestController
      * Return User Client
      * @Rest\Get("api/user/{id}", name="app_user_show", requirements={"id"="\d+"})
      * @param UserClient $userClient
+     * @param CacheInterface $cache
      * @View(statusCode=200, serializerGroups={"show"})
      * @SWG\Response(
      *     response="200",
@@ -61,13 +64,16 @@ class UserClientController extends AbstractFOSRestController
      * @SWG\Tag(name="User of Client")
      * @SWG\Parameter( name="Authorization", in="header", required=true, type="string", default="Bearer TOKEN", description="Authorization" )
      */
-    public function showUser(UserClient $userClient)
+    public function showUser(UserClient $userClient, CacheInterface $cache)
     {
         if ($userClient->getUser() != $this->getUser()) {
             throw new NotUserCreatedException('Not Creator');
         }
 
-        return $userClient;
+        return $cache->get('user_'.$userClient->getId(), function (ItemInterface $item) use ($userClient) {
+            $item->expiresAfter(3600);
+            return $userClient;
+        });
     }
 
     /**
@@ -75,6 +81,7 @@ class UserClientController extends AbstractFOSRestController
      * @Rest\Post("api/user", name="app_user_create")
      * @param UserClient $userClient
      * @param ConstraintViolationList $violations
+     * @param CacheInterface $cache
      * @View(statusCode=201,serializerGroups={"show"})
      * @ParamConverter(
      *     "userClient",
@@ -100,7 +107,7 @@ class UserClientController extends AbstractFOSRestController
      * @SWG\Parameter( name="full_name", in="formData", type="string", required=true )
      * @SWG\Parameter( name="email", in="formData", type="string", required=true )
      */
-    public function createUser(UserClient $userClient, ConstraintViolationList $violations)
+    public function createUser(UserClient $userClient, ConstraintViolationList $violations, CacheInterface $cache)
     {
         if (count($violations)) {
             $message = 'The JSON sent contains invalid data. Here are the errors you need to correct: ';
@@ -117,6 +124,12 @@ class UserClientController extends AbstractFOSRestController
         $em->persist($userClient);
         $em->flush();
 
+        $cache->get('user_'.$userClient->getId(), function (ItemInterface $item) use ($userClient) {
+           $item->expiresAfter(3600);
+
+           return $userClient;
+        });
+
         return $this->view(
             $userClient,
             201,
@@ -128,6 +141,7 @@ class UserClientController extends AbstractFOSRestController
      * Delete User
      * @Rest\Delete("api/user/{id}", name="app_user_delete", requirements={"id"="\d+"})
      * @param UserClient $user
+     * @param CacheInterface $cache
      * @View(statusCode=204)
      * @SWG\Response(
      *     response="204",
@@ -144,7 +158,7 @@ class UserClientController extends AbstractFOSRestController
      * @SWG\Tag(name="User of Client")
      * @SWG\Parameter( name="Authorization", in="header", required=true, type="string", default="Bearer TOKEN", description="Authorization" )
      */
-    public function deleteUser(UserClient $user)
+    public function deleteUser(UserClient $user,CacheInterface $cache)
     {
         if ($user->getUser() != $this->getUser()) {
             throw new NotUserCreatedException('Not Creator');
@@ -163,6 +177,7 @@ class UserClientController extends AbstractFOSRestController
      * @param UserClient $user
      * @param UserClient $userUpdate
      * @param ConstraintViolationList $violations
+     * @param CacheInterface $cache
      * @View(statusCode=200, serializerGroups={"show"})
      * @ParamConverter("userClient")
      * @ParamConverter(
@@ -187,7 +202,7 @@ class UserClientController extends AbstractFOSRestController
      * @SWG\Tag(name="User of Client")
      * @SWG\Parameter( name="Authorization", in="header", required=true, type="string", default="Bearer TOKEN", description="Authorization" )
      */
-    public function updateUser(UserClient $user, UserClient $userUpdate, ConstraintViolationList $violations)
+    public function updateUser(UserClient $user, UserClient $userUpdate, ConstraintViolationList $violations, CacheInterface $cache)
     {
         if ($user->getUser() != $this->getUser()) {
             throw new NotUserCreatedException('Not Creator');
@@ -212,6 +227,8 @@ class UserClientController extends AbstractFOSRestController
 
         $em = $this->getDoctrine()->getManager();
         $em->flush();
+
+        $cache->delete('user_'.$user->getId());
 
         return $this->view(
             $user,

@@ -8,7 +8,10 @@ use FOS\RestBundle\Controller\AbstractFOSRestController;
 use FOS\RestBundle\Controller\Annotations as Rest;
 use FOS\RestBundle\Controller\Annotations\View;
 use FOS\RestBundle\Request\ParamFetcherInterface;
+use Knp\Component\Pager\PaginatorInterface;
 use Swagger\Annotations as SWG;
+use Symfony\Contracts\Cache\CacheInterface;
+use Symfony\Contracts\Cache\ItemInterface;
 
 class ProductController extends AbstractFOSRestController
 {
@@ -17,12 +20,7 @@ class ProductController extends AbstractFOSRestController
      * Returns a collection of Product
      * @Rest\Get("api/products", name="app_product_list")
      * @param ParamFetcherInterface $paramFetcher
-     * @Rest\QueryParam(
-     *     name="keyword",
-     *     requirements="[a-zA-Z0-9]",
-     *     nullable=true,
-     *     description="The keyword to search for"
-     * )
+     * @param PaginatorInterface $paginator
      * @Rest\QueryParam(
      *     name="order",
      *     requirements="asc|desc",
@@ -36,10 +34,10 @@ class ProductController extends AbstractFOSRestController
      *     description="Max number of products per page"
      * )
      * @Rest\QueryParam(
-     *     name="offset",
+     *     name="page",
      *     requirements="\d+",
      *     default="1",
-     *     description="The pagination offset"
+     *     description="Page"
      * )
      * @View(statusCode=200)
      * @SWG\Response(
@@ -53,23 +51,28 @@ class ProductController extends AbstractFOSRestController
      * @SWG\Tag(name="Product")
      * @SWG\Parameter( name="Authorization", in="header", required=true, type="string", default="Bearer TOKEN", description="Authorization" )
      */
-    public function getProducts(ParamFetcherInterface $paramFetcher)
+    public function getProducts(ParamFetcherInterface $paramFetcher,PaginatorInterface $paginator)
     {
-        $pager = $this->getDoctrine()->getRepository(Product::class)->search(
+        $query = $this->getDoctrine()->getRepository(Product::class)->pagination(
             $this->getUser()->getId(),
-            $paramFetcher->get('keyword'),
-            $paramFetcher->get('order'),
-            $paramFetcher->get('limit'),
-            $paramFetcher->get('offset')
+            $paramFetcher->get('order')
         );
 
-        return new Products($pager);
+        $products = $paginator->paginate(
+            $query,
+            $paramFetcher->get('page'),
+            $paramFetcher->get('limit')
+
+        );
+        
+        return new Products($products);
     }
 
     /**
      * Return one Product
      * @Rest\Get("api/product/{id}", name="app_product_show", requirements={"id"="\d+"})
      * @param Product $product
+     * @param CacheInterface $cache
      * @View(statusCode=200, serializerGroups={"product"})
      * @SWG\Response(
      *     response="200",
@@ -86,8 +89,11 @@ class ProductController extends AbstractFOSRestController
      * @SWG\Tag(name="Product")
      * @SWG\Parameter( name="Authorization", in="header", required=true, type="string", default="Bearer TOKEN", description="Authorization" )
      */
-    public function getProduct(Product $product)
+    public function getProduct(Product $product, CacheInterface $cache)
     {
-        return $product;
+        return $cache->get('product_'.$product->getId() ,function (ItemInterface $item) use ($product) {
+            $item->expiresAfter(3600);
+            return $product;
+        });
     }
 }
